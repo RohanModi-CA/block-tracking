@@ -159,3 +159,8 @@ So the recursive call gets a pixel and the current region color. It checks if it
 3. Call yourself on your neighbours with ++region_number and the new color.
 
 So outside the flood fill, we will handle multiple regions. 
+
+AND, if you don't touch the edge and you ONLY have one color that borders you, you are surrounded by that color! 
+
+I think we got it.
+
