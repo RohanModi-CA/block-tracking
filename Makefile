@@ -1,28 +1,61 @@
+# Compiler and flags
 CC := gcc
-CFLAGS := -Wall -Wextra -O2 -Ilib/ppm_lib -Iimage_processing
-LIBCFLAGS := -w
+CFLAGS := -Wall -Wextra -O0 -g
+LDFLAGS :=
 
-OBJ := main.o ppm.o normalize_image.o
-BIN := main
+# Directories
+LIB_DIR := lib
+IMG_PROC_DIR := image_processing
+SRC_DIRS := . $(IMG_PROC_DIR)
+LIB_SUBDIRS := $(shell find $(LIB_DIR) -type d)
 
-all: $(BIN)
+# Include paths
+INCLUDES := $(addprefix -I,$(LIB_SUBDIRS) $(IMG_PROC_DIR))
 
-main.o: main.c
-	@$(CC) $(CFLAGS) -c $<
+# Output
+TARGET := main
 
-ppm.o: lib/ppm_lib/ppm.c
-	@$(CC) $(LIBCFLAGS) -Ilib/ppm_lib -c $<
+# Source files
+SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
+LIB_SRCS := $(foreach dir,$(LIB_SUBDIRS),$(wildcard $(dir)/*.c))
 
-normalize_image.o: image_processing/normalize_image.c
-	@$(CC) $(CFLAGS) -c $<
+# Object files
+OBJS := $(SRCS:.c=.o)
+LIB_OBJS := $(LIB_SRCS:.c=.o)
 
-$(BIN): $(OBJ)
-	@$(CC) $(OBJ) -o $(BIN)
+# All objects
+ALL_OBJS := $(OBJS) $(LIB_OBJS)
 
-run: $(BIN)
-	@./$(BIN)
+# Dependency files
+DEPS := $(ALL_OBJS:.o=.d)
 
+# Silence commands
+.SILENT:
+
+# Default target
+all: $(TARGET)
+
+# Link
+$(TARGET): $(ALL_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+# Compile main sources with full warnings
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+
+# Compile library sources without warnings
+$(LIB_DIR)/%.o: $(LIB_DIR)/%.c
+	$(CC) -w $(INCLUDES) -MMD -MP -c $< -o $@
+
+# Run target
+run: $(TARGET)
+	./$(TARGET)
+
+# Clean
 clean:
-	rm -f @$(BIN) *.o
+	rm -f $(ALL_OBJS) $(DEPS) $(TARGET)
 
-.INTERMEDIATE: $(OBJ)
+# Include dependencies
+-include $(DEPS)
+
+.PHONY: all run clean
