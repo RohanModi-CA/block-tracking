@@ -197,3 +197,15 @@ Okay so after all of this our smoothed image is:
 
 ![](attachments/Pasted%20image%2020260207024454.png)
 It's interesting because it seems more rounded than anything, which is to be expected, but the grey bits stay that way. I think that's because we're in sRGB. I guess let's try in linear RGB.
+
+![](attachments/Pasted%20image%2020260207030348.png)
+
+It does get much better, which is good, but the background is concerning. I worry this outline may be an issue.
+
+The reason is, by the way, that the tape was like this:
+![](attachments/Pasted%20image%2020260207030602.png)
+After normalization. What does the photo look like in lRGB?
+
+![](attachments/Pasted%20image%2020260207030809.png)
+Like this, which looks sort of cool.
+

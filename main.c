@@ -2,6 +2,7 @@
 #include "lib/ppm_lib/ppm.h"
 #include "image_processing/IP_types.h"
 #include "image_processing/normalize_image.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include "image_processing/hitboxing.h"
 
@@ -19,6 +20,16 @@ int main()
 	struct rgb GBLACK = {55,55,55};
 	//struct rgb BLACK = {0,0,0};
 
+	NORMALIZE_IMAGE_linearize_RGB(&DGREEN);
+	NORMALIZE_IMAGE_linearize_RGB(&BLUE);
+	// NORMALIZE_IMAGE_linearize_RGB(&WHITE);
+	NORMALIZE_IMAGE_linearize_RGB(&GBLACK);
+	// NORMALIZE_IMAGE_linearize_RGB(&BLACK);
+	
+	NORMALIZE_IMAGE_linearize_PPM(image);
+
+	PPM_swrite("resources/linearizedInput.ppm", image);
+
 	struct rgb accepted_colors[] = {DGREEN, BLUE, GBLACK};
 	size_t accepted_colors_length = sizeof(accepted_colors)/sizeof(accepted_colors[0]);
 
@@ -27,7 +38,7 @@ int main()
 
 	struct IP_scalar_ppm normalized = NORMALIZE_IMAGE_scalar(image, options);
 
-	IP_scalar_ppm_save("resources/normalized.ppm", normalized, true);
+	IP_scalar_ppm_save("resources/normalized.ppm", normalized, false);
 
 	struct IP_blur_options blur_opt;
 	blur_opt.save_intermediates = true;

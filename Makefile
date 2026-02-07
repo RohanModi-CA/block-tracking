@@ -1,7 +1,7 @@
 # Compiler and flags
 CC := gcc
 CFLAGS := -Wall -Wextra -O0 -g
-LDFLAGS :=
+LDFLAGS := -lm
 
 # Directories
 LIB_DIR := lib
@@ -37,7 +37,7 @@ all: $(TARGET)
 
 # Link
 $(TARGET): $(ALL_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 # Compile main sources with full warnings
 %.o: %.c

@@ -2,6 +2,32 @@
 #include <stdlib.h>
 #include "../lib/ppm_lib/ppm.h"
 #include "IP_types.h"
+#include <math.h>
+
+
+// linearizes in place
+void NORMALIZE_IMAGE_linearize_RGB(struct rgb *RGB)
+{
+	float norm_R = ((float)RGB->R)/(255.0f);
+	float norm_G = ((float)RGB->G)/(255.0f);
+	float norm_B = ((float)RGB->B)/(255.0f);
+
+	RGB->R = (int) (255*pow(norm_R, 2.2));
+	RGB->G = (int) (255*pow(norm_G, 2.2));
+	RGB->B = (int) (255*pow(norm_B, 2.2));
+
+	return;
+}
+
+
+void NORMALIZE_IMAGE_linearize_PPM(PPM ppm)
+{
+	for (int i=0; i<ppm->height*ppm->width; ++i)
+	{
+		NORMALIZE_IMAGE_linearize_RGB(&ppm->data[i]);
+	}
+}
+
 
 
 void best_color_match(struct rgb *pixel, struct NORMALIZE_IMAGE_options options)
