@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "../lib/ppm_lib/ppm.h"
+#include <stdbool.h>
 
 struct IP_scalar_ppm_map
 {
@@ -20,6 +21,7 @@ struct IP_scalar_ppm
 
 // And let's just make a function that converts between the two.
 PPM IP_scalar_to_normal_PPM(struct IP_scalar_ppm scalar);
+void IP_scalar_ppm_save(const char *fn, struct IP_scalar_ppm scalar, bool clear_map);
 
 struct IP_scalar_ppm IP_new_scalar_ppm(int height, int width);
 

@@ -1,8 +1,10 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "IP_types.h"
 #include "../lib/ppm_lib/ppm.h"
 #include <stdint.h>
 #include <limits.h>
+#include <stdbool.h>
 
 
 PPM IP_scalar_to_normal_PPM(struct IP_scalar_ppm scalar)
@@ -69,4 +71,19 @@ struct IP_scalar_ppm IP_new_scalar_ppm(int height, int width)
 
 	return out;
 }
+
+// clear_map sets the length of the map to zero if you want to stick to traditional
+// fractionals.
+void IP_scalar_ppm_save(const char *fn, struct IP_scalar_ppm scalar, bool clear_map)
+{
+	if (clear_map)
+	{
+		scalar.map.colors_length = 0;
+	}
+
+	PPM temp = IP_scalar_to_normal_PPM(scalar);
+	PPM_swrite(fn, temp);
+	PPM_free(temp);
+}
+
 

@@ -9,7 +9,7 @@ struct int_xy
 	int y;
 };
 
-int index_from_row_col(int row, int col, int image_width)
+static int index_from_row_col(int row, int col, int image_width)
 {
 	return row*(image_width) + col;
 }

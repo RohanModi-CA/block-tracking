@@ -6,33 +6,14 @@
 #include <string.h>
 
 
-struct int_xy
-{
-	int x;
-	int y;
-};
-
-int index_from_row_col(int row, int col, int image_width)
+static int index_from_row_col(int row, int col, int image_width)
 {
 	return row*(image_width) + col;
 }
 
-// Col is x, Row is y.
-struct int_xy col_row_from_index(int n, int image_width)
-{
-	struct int_xy out;
-
-	out.y = (n/image_width);
-	out.x = n - (out.y - image_width);
-	return out;
-}
-
-
-
-
+// ASSUMES YOU'VE PROPERLY SET REWARDS AND THRESHOLDED TO PIXEL_VALUES
 struct IP_scalar_ppm HITBOXING_reward_ppm(struct IP_scalar_ppm inp, struct HITBOXING_SAT_options options)
 {
-	// ASSUMES YOU'VE PROPERLY SET REWARDS AND THRESHOLDED TO PIXEL_VALUES
 	struct IP_scalar_ppm out;	
 
 	struct IP_scalar_ppm_map out_map;
@@ -53,6 +34,7 @@ struct IP_scalar_ppm HITBOXING_reward_ppm(struct IP_scalar_ppm inp, struct HITBO
 }
 
 
+// THIS DOES NOT USE REWARDS. THIS DIRECTLY AVERAGES INP's PIXELS.
 struct IP_scalar_ppm HITBOXING_SAT(struct IP_scalar_ppm inp_rewards, struct HITBOXING_SAT_options options)
 {
 	// This takes the scalar_ppm that contains the REWARDS.
@@ -156,7 +138,7 @@ struct IP_scalar_ppm HITBOXING_DENSITY_MAP(struct IP_scalar_ppm inp_SAT,
 
 		float norm_content = (float)square_content / (float)square_geom_area;
 
-		out.pixel_values[i] = (int)(10000 * norm_content);
+		out.pixel_values[i] = (int)(norm_content);
 	}
 
 	return out;

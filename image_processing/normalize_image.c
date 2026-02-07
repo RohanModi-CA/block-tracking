@@ -4,7 +4,6 @@
 #include "IP_types.h"
 
 
-
 void best_color_match(struct rgb *pixel, struct NORMALIZE_IMAGE_options options)
 {
 	/* Takes a single pixel and replaces it by its closest match in options.accepted_colors. In-place. Least-squares.

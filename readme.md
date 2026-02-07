@@ -160,7 +160,40 @@ So the recursive call gets a pixel and the current region color. It checks if it
 
 So outside the flood fill, we will handle multiple regions. 
 
+had to convert recursion->basic stack to avoid stack overflow. also maybe if we need we can look up "scanline" flood which apparently is faster but this shoudl still be O(N) in its present state.
+
 AND, if you don't touch the edge and you ONLY have one color that borders you, you are surrounded by that color! 
 
 I think we got it.
 
+
+cleanup
+---
+
+Okay for now let's do the cleanup that we very much have to do. Part of that I think is working in linear RGB from the beginning, since otherwise averaging does not work.
+
+So first thing is linear RGB which we will do at the beginning. We also need to define our colors this way.
+
+Okay, also, apparently this is a big deal that different cameras shoot in different encodings or something and linearizing depends on the gamma function of the camera or something. but to first order I can just use channel_l = channel_o^2.2 where channel is in R,G,B and normalized to 1. 
+
+Or maybe we should be working in "Lab". Okay turns out we should, lRGB is just for "light energy". Great! Ugh.
+
+Actually, we will do neither of these things right now. We will just work in sRGB, since it seems to good enough, and we can change it, if we want to, later!
+
+Ugh! Such a mess. Also maybe the blur isn't important? But I think it is. actually it is. But we need 3 blurs in one, one for each channel.
+
+So we're going to implement the three step blur.
+0. Start with a pre-thresholded PPM, with a color_map.
+1. Create 3 scalar PPMs for each channel.
+2. SAT each of them. (just by channel)
+3. Density map each of them (per-channel blur)
+	1. This gives us the average color, we need to threshold this back.
+4. Recombine into PPM with color_map.
+
+Should it be pre-thresholded? Not really sure. I doubt it makes much of a difference, and in theory we can change this later on if this is the source of issues, but I think from what we've seen so far its not that bad.
+
+
+Okay so after all of this our smoothed image is:
+
+![](attachments/Pasted%20image%2020260207024454.png)
+It's interesting because it seems more rounded than anything, which is to be expected, but the grey bits stay that way. I think that's because we're in sRGB. I guess let's try in linear RGB.

@@ -1,7 +1,7 @@
 #ifndef HITBOXING_H
 #define HITBOXING_H
 
-
+#include <stdbool.h>
 
 struct HITBOXING_SAT_options 
 {
