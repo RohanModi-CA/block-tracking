@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "image_processing/closing.h"
 #include "flood_fill.h"
+#include "config.h"
 
 int main() 
 { 
@@ -61,6 +62,15 @@ int main()
 	// Now we will call the flood fill and just look at the largest region.
 	struct FLOOD_FILL_region *regions;
 	int num_regions=0;
-	regions = FLOOD_FILL_find_all_regions(dilated, &num_regions);
+
+	bool (*region_validator)(struct FLOOD_FILL_region_validator_options, void *ctx);
+	region_validator = CONFIG_region_validator;
+	struct FLOOD_FILL_FAR_options FAR_opt;
+	FAR_opt.region_validator = region_validator;
+	// We need to give it the color we're interested in, which is Blue.
+	int blue_index = IP_map_to_index(blurred.map, BLUE);
+	FAR_opt.ctx = &blue_index;
+
+	regions = FLOOD_FILL_find_all_regions(dilated, &num_regions, FAR_opt);
 
 }

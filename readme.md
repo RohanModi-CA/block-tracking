@@ -277,3 +277,20 @@ Uh oh, flood fill is taking forever! We might have to use scanline flood fill. A
 Okay I started to use growing arrays. I'm not going to do this for the stack since we only allocate that once.
 
 Okay, it's a little faster now, but still not great. Regardless, let's continue forward. Let's add in a feature where we can avoid adding regions if they don't meet criteria (color, we don't care about black regions, or even green regions, now that I think about it, area, edge length, etc). 
+
+Okay so the flood region thing will call the region validator and use that to decide whether to add it to the list of regions.
+
+In doing this, we're down to 71 regions! Very nice! However we need to actually mark the color of our regions which we will do now. Okay done. Now let's filter for only blue regions of the correct size. Okay we can't build functions like we do in python so we need to use context pointers.
+
+Okay, cool, we count 13 regions that are blue. Let's check this. Hmm. Okay, well this one says it has no boundary colors...
+
+Okay, well actually going in to check what it found, it found this:
+
+![](attachments/Pasted%20image%2020260207180645.png)
+Cool! That is a bona fide blue region. However there are no boundary_colors which is very concerning. It says there are 438 members. Do i really want to count this? Maybe there is a way to, in GIMP.
+
+![](attachments/Pasted%20image%2020260207180925.png)
+![](attachments/Pasted%20image%2020260207180933.png)
+Ha! Great. 
+
+However, it says there are no edge members either, which is unfortunate. What's up with that?

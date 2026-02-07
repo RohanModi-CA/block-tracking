@@ -48,6 +48,8 @@ struct FLOOD_FILL_growing_int_array FLOOD_FILL_new_gia(int cap)
 }
 
 
+
+
 static void initialize_region(struct FLOOD_FILL_region *r)
 {
 	r->touches_edge = false;
@@ -56,7 +58,6 @@ static void initialize_region(struct FLOOD_FILL_region *r)
 	r->members_i = FLOOD_FILL_new_gia(1<<8);
 	return;
 }
-
 
 
 
@@ -115,7 +116,6 @@ void flood_fill_iterative(struct flood_fill_recursive_call_options opt)
 				stack_size++;
 			}
 		}
-
 		else opt.region->touches_edge = true;
 		
 		if (row != image_height-1)
@@ -150,7 +150,7 @@ void flood_fill_iterative(struct flood_fill_recursive_call_options opt)
 
 /* Puts the number of regions into num_regions.
  */ 
-struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, int *num_regions)
+struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, int *num_regions, struct FLOOD_FILL_FAR_options opt)
 {
 	int total_pixels = inp.height * inp.width;
 	bool *visited = calloc(total_pixels, sizeof(bool));
@@ -174,17 +174,32 @@ struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, 
 
 		
 		// then flood fill this region
-		struct flood_fill_recursive_call_options opt;
-		opt.inp = inp;
-		opt.i_start = i;
-		opt.visited_yet = visited;
-		opt.region = r;
-		opt.which_color = inp.pixel_values[i];
-		opt.i_caller = -1;
+		struct flood_fill_recursive_call_options RCO_opt;
+		RCO_opt.inp = inp;
+		RCO_opt.i_start = i;
+		RCO_opt.visited_yet = visited;
+		RCO_opt.region = r;
+		RCO_opt.which_color = inp.pixel_values[i];
+		RCO_opt.i_caller = -1;
+		r->color = inp.pixel_values[i];
 		
-		flood_fill_iterative(opt);  
-		
-		(*num_regions)++;
+		flood_fill_iterative(RCO_opt);  
+
+		struct FLOOD_FILL_region_validator_options RVO_opt;
+		RVO_opt.region = *RCO_opt.region;
+
+		bool valid_region = opt.region_validator(RVO_opt, opt.ctx);
+
+		if (valid_region)
+		{
+			(*num_regions)++;
+		}
+		else
+		{ // Clean up.
+			free(RCO_opt.region->boundary_colors.arr);
+			free(RCO_opt.region->edge_members.arr);
+			free(RCO_opt.region->members_i.arr);
+		}
 	}
 	
 	free(visited);
