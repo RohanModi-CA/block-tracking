@@ -209,3 +209,53 @@ After normalization. What does the photo look like in lRGB?
 ![](attachments/Pasted%20image%2020260207030809.png)
 Like this, which looks sort of cool.
 
+Anyway, I think we'll need to look at how we can deal with the black outline between them, since this may be somewhat unavoidable. Right now, we only know what colors border which. We wanted to know how many times it bordered each color, but I don't think we actually measured that. 
+
+I think that we can actually do something where each time we hit a boundary, we tell that boundaries' boundary data the ID of the region that hit it. And we can do this every time we hit, which tells us how many pixels are shared.
+
+However, this doesn't differentiate between thin and thick regions, which is mostly what we want. How about full surrounded? That could work.
+
+Another technique to get rid of small strips is apparently [morphological closing](https://medium.com/@anshul16/closing-morphological-operation-image-processing-59a0ef6210e3). After doing basic research, I think it basically works like this: 
+
+Say you have this pixel array. You want to remove small things of B, so you will define a 'structuring element'. For example, a 3x3 square. So you first perform an erosion, where you look at all pixels of B, and ask whether the 3x3 square centered on each is entirely B, and if not, remove it. So this:
+
+```
+W B B B W
+W B B B W
+W B B B W
+W B B B W
+W W W W W
+```
+
+Becomes:
+
+```
+W W W W W
+W W B W W
+W W B W W
+W W W W W
+W W W W W
+```
+
+And then you just do the opposite, expanding all B into a 3x3 square, called a dilation:
+
+```
+W B B B W
+W B B B W
+W B B B W
+W B B B W
+W W W W W
+```
+
+And in this case, it restores the original, since our structuring element accurately captures the structure we started with. However, note that if we started with a 5x5 structuring element, for example, then we would've removed this entire black strip. 
+
+I think this will work well if we do it on the black in our picture, to remove any of these gaps. Let's implement it. Also, this exists in OpenCV, lol. Oh, NIHS, but hey, now I can say I've actually started to understand the basics of CV. 
+
+ANYWAY, let's go forward.
+
+I think we'll first implement the standard, (adjusted to our color thing) opening/closing, and a TODO if we ever want to optimize is add in a check to only do it on regions that border our color, or something like that.
+
+What color do we erode with? I want to say the mode of the surrounding colors? Sounds good. I think a TODO is also to replace the mode with a pre-allocated list of counts, which is much better. But for now this is okay, ultimately sorting 25 values even per pixel isn't that bad.
+
+
+.. this is taking a very long time to run... is it all the sorts? oh no..

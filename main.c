@@ -4,7 +4,7 @@
 #include "image_processing/normalize_image.h"
 #include <stdbool.h>
 #include <stdio.h>
-#include "image_processing/hitboxing.h"
+#include "image_processing/closing.h"
 
 int main() 
 { 
@@ -18,7 +18,8 @@ int main()
 	struct rgb BLUE = {43, 84, 173};
 	//struct rgb WHITE = {224, 224, 224};
 	struct rgb GBLACK = {55,55,55};
-	//struct rgb BLACK = {0,0,0};
+	struct rgb BLACK = {0,0,0};
+	
 
 	NORMALIZE_IMAGE_linearize_RGB(&DGREEN);
 	NORMALIZE_IMAGE_linearize_RGB(&BLUE);
@@ -43,6 +44,19 @@ int main()
 	struct IP_blur_options blur_opt;
 	blur_opt.save_intermediates = true;
 	struct IP_scalar_ppm blurred = IP_blur(normalized, blur_opt);
+
+	// Now let's do the morphological closing.
+	struct CLOSING_options closing_opt;
+	closing_opt.structuring_radius = 3;
+	int target_color = IP_map_to_index(blurred.map, GBLACK);
+	closing_opt.target_color = target_color;
+
+	struct IP_scalar_ppm eroded = CLOSING_erosion(blurred, closing_opt);
+	IP_scalar_ppm_save("resources/eroded.ppm", eroded, false);	
+	struct IP_scalar_ppm dilated = CLOSING_dilation(eroded, closing_opt);
+	IP_scalar_ppm_save("resources/closed", dilated, false);
+
+		
 
 	/*
 

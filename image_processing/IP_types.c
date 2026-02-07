@@ -7,6 +7,27 @@
 #include <stdbool.h>
 
 
+
+
+int IP_index_from_row_col(int row, int col, int image_width)
+{
+	return row*(image_width) + col;
+}
+
+// Col is x, Row is y.
+struct int_xy IP_col_row_from_index(int n, int image_width)
+{
+	struct int_xy out;
+
+	out.y = (n/image_width);
+	out.x = n - (out.y - image_width);
+	return out;
+}
+
+
+
+
+
 PPM IP_scalar_to_normal_PPM(struct IP_scalar_ppm scalar)
 {
 	// Will convert a scalar_ppm to big ppm, handling the case that there is no map length.
@@ -87,3 +108,38 @@ void IP_scalar_ppm_save(const char *fn, struct IP_scalar_ppm scalar, bool clear_
 }
 
 
+int IP_map_to_index(struct IP_scalar_ppm_map map, struct rgb RGB)
+{
+	for(int i=0; i<map.colors_length; ++i)
+	{
+		if (map.colors[i].R == RGB.R && map.colors[i].B == RGB.B 
+				&& map.colors[i].G == RGB.G)
+		{
+			return i;
+		}
+	}
+		// or we failed.
+		printf("map_to_index: color not found in map.\n");
+		exit(1);
+}
+
+
+int IP_least_squares_map_to_index(struct IP_scalar_ppm_map map, struct rgb RGB)
+{
+	int min_error = INT_MAX;
+	int i_min_error = -1;
+	for (int i=0; i<map.colors_length; ++i)
+	{
+		int Re = RGB.R - map.colors[i].R;
+		int Ge = RGB.G - map.colors[i].G;
+		int Be = RGB.B - map.colors[i].B;
+
+		int this_error = Re*Re + Be*Be + Ge*Ge;
+		if (this_error < min_error)
+		{
+			min_error = this_error;
+			i_min_error = i;
+		}
+	}
+	return i_min_error;
+}

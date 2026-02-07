@@ -3,11 +3,6 @@
 #include "IP_types.h"
 #include "stdbool.h"
 
-struct int_xy
-{
-	int x;
-	int y;
-};
 
 static int index_from_row_col(int row, int col, int image_width)
 {

@@ -26,4 +26,19 @@ void IP_scalar_ppm_save(const char *fn, struct IP_scalar_ppm scalar, bool clear_
 struct IP_scalar_ppm IP_new_scalar_ppm(int height, int width);
 
 
+struct int_xy IP_col_row_from_index(int n, int image_width);
+
+int IP_index_from_row_col(int row, int col, int image_width);
+
+struct int_xy
+{
+	int x;
+	int y;
+};
+
+
+int IP_map_to_index(struct IP_scalar_ppm_map map, struct rgb RGB);
+int IP_least_squares_map_to_index(struct IP_scalar_ppm_map map, struct rgb RGB);
+
 #endif
+
