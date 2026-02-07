@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "image_processing/closing.h"
+#include "flood_fill.h"
 
 int main() 
 { 
@@ -56,41 +57,10 @@ int main()
 	struct IP_scalar_ppm dilated = CLOSING_dilation(eroded, closing_opt);
 	IP_scalar_ppm_save("resources/closed.ppm", dilated, false);
 
-		
 
-	/*
+	// Now we will call the flood fill and just look at the largest region.
+	struct FLOOD_FILL_region *regions;
+	int num_regions=0;
+	regions = FLOOD_FILL_find_all_regions(dilated, &num_regions);
 
-	struct HITBOXING_SAT_options SAT_options;
-	int rewards[] = {-50,1,-25};
-	SAT_options.rewards = rewards;
-	SAT_options.rewards_length = sizeof(rewards)/sizeof(rewards[0]);
-	SAT_options.density_square_radius = 10;
-	
-	
-	struct IP_scalar_ppm scalar2 = HITBOXING_reward_ppm(scalar, SAT_options);
-
-	PPM out = IP_scalar_to_normal_PPM(scalar2);
-
-	PPM_swrite("resources/scalar.ppm", out);
-
-
-	struct IP_scalar_ppm SAT = HITBOXING_SAT(scalar2, SAT_options);
-	PPM out2 = IP_scalar_to_normal_PPM(SAT);
-	PPM_swrite("resources/sat.ppm", out2);
-
-
-	struct IP_scalar_ppm DENSITY_MAP = HITBOXING_DENSITY_MAP(SAT, SAT_options);
-	PPM out3 = IP_scalar_to_normal_PPM(DENSITY_MAP);
-	PPM_swrite("resources/density.ppm", out3);
-
-	
-	struct NORMALIZE_IMAGE_options threshold_options;
-	threshold_options.accepted_colors = (struct rgb[]){WHITE, GBLACK, BLACK};
-	threshold_options.accepted_colors_length = 3;
-
-	struct IP_scalar_ppm thresholded = NORMALIZE_IMAGE_scalar(out3, threshold_options);
-	PPM thresholded_out = IP_scalar_to_normal_PPM(thresholded);
-	PPM_swrite("resources/thresholded.ppm", thresholded_out);
-
-	*/
 }

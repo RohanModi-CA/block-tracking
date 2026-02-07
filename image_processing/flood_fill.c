@@ -9,29 +9,54 @@ static int index_from_row_col(int row, int col, int image_width)
 	return row*(image_width) + col;
 }
 
-// Col is x, Row is y.
-struct int_xy col_row_from_index(int n, int image_width)
-{
-	struct int_xy out;
-
-	out.y = (n/image_width);
-	out.x = n - (out.y - image_width);
-	return out;
-}
-
-
-
-
 
 struct flood_fill_recursive_call_options
 {
 	struct IP_scalar_ppm inp;
 	int i_start;
 	bool *visited_yet;
-	struct region *region;
+	struct FLOOD_FILL_region *region;
 	int which_color;
 	int i_caller;
 };
+
+
+
+
+// Appends V to gia
+void FLOOD_FILL_append_to_GIA(struct FLOOD_FILL_growing_int_array *gia, int V)
+{
+	if(gia->length == gia->capacity)
+	{
+		int new_cap = 2 * gia->capacity;
+		gia->arr = (int *) realloc(gia->arr, sizeof(int)*new_cap);
+		gia->capacity = new_cap;
+	}
+		gia->arr[gia->length] = V;
+		++gia->length;
+	return;
+}
+
+struct FLOOD_FILL_growing_int_array FLOOD_FILL_new_gia(int cap)
+{
+	struct FLOOD_FILL_growing_int_array out;
+	out.length = 0;
+
+	out.capacity = cap;
+	out.arr = (int *) malloc(sizeof(int)*out.capacity);
+	return out;
+}
+
+
+static void initialize_region(struct FLOOD_FILL_region *r)
+{
+	r->touches_edge = false;
+	r->edge_members = FLOOD_FILL_new_gia(1<<8);
+	r->boundary_colors = FLOOD_FILL_new_gia(1<<8);
+	r->members_i = FLOOD_FILL_new_gia(1<<8);
+	return;
+}
+
 
 
 
@@ -65,28 +90,32 @@ void flood_fill_iterative(struct flood_fill_recursive_call_options opt)
 		
 		if (pixel_color != opt.which_color)
 		{
-			opt.region->edge_members[opt.region->edge_members_length] = i_caller;
-			++opt.region->edge_members_length;
-			opt.region->boundary_colors[opt.region->boundary_colors_length] = pixel_color;
-			++opt.region->boundary_colors_length;
+			FLOOD_FILL_append_to_GIA(&opt.region->edge_members, i_caller);
+			FLOOD_FILL_append_to_GIA(&opt.region->boundary_colors, pixel_color);
 			continue;
 		}
 		
 		opt.visited_yet[i_current] = true;
-		opt.region->members_i[opt.region->members_i_length] = i_current;
-		++opt.region->members_i_length;
+
+		FLOOD_FILL_append_to_GIA(&opt.region->members_i, i_current);
+
 		
-		struct int_xy my_xy = col_row_from_index(i_current, image_width);
+		struct int_xy my_xy = IP_col_row_from_index(i_current, image_width);
 		int col = my_xy.x;
 		int row = my_xy.y;
 		
-		// Push neighbors onto stack
+
+
 		if (row != 0)
 		{
-			stack_i[stack_size] = index_from_row_col(row-1, col, image_width);
-			stack_caller[stack_size] = i_current;
-			stack_size++;
+			int neighbor = index_from_row_col(row-1, col, image_width);
+			if (!opt.visited_yet[neighbor]) {  
+				stack_i[stack_size] = neighbor;
+				stack_caller[stack_size] = i_current;
+				stack_size++;
+			}
 		}
+
 		else opt.region->touches_edge = true;
 		
 		if (row != image_height-1)
@@ -121,7 +150,7 @@ void flood_fill_iterative(struct flood_fill_recursive_call_options opt)
 
 /* Puts the number of regions into num_regions.
  */ 
-struct region *find_all_regions(struct IP_scalar_ppm inp, int *num_regions)
+struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, int *num_regions)
 {
 	int total_pixels = inp.height * inp.width;
 	bool *visited = calloc(total_pixels, sizeof(bool));
@@ -129,7 +158,7 @@ struct region *find_all_regions(struct IP_scalar_ppm inp, int *num_regions)
 	// worst case is that each pixel is its own region. i thought somehow
 	// four color theorem could mean that the worst case was better
 	// but now that I think of it it implies the opposite!
-	struct region *regions = malloc(total_pixels * sizeof(struct region));
+	struct FLOOD_FILL_region *regions = malloc(total_pixels * sizeof(struct FLOOD_FILL_region));
 	*num_regions = 0;
 	
 	for (int i = 0; i < total_pixels; i++)
@@ -138,14 +167,11 @@ struct region *find_all_regions(struct IP_scalar_ppm inp, int *num_regions)
 			continue;
 			
 		// Initialize new region
-		struct region *r = &regions[*num_regions];
-		r->boundary_colors_length = 0;
-		r->boundary_colors = malloc(total_pixels * sizeof(int));
-		r->touches_edge = false;
-		r->members_i = malloc(total_pixels * sizeof(int));
-		r->members_i_length = 0;
-		r->edge_members = malloc(total_pixels * sizeof(int));
-		r->edge_members_length = 0;
+
+
+		struct FLOOD_FILL_region *r = &regions[*num_regions];
+		initialize_region(r);
+
 		
 		// then flood fill this region
 		struct flood_fill_recursive_call_options opt;

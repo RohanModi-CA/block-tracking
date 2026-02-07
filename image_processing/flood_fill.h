@@ -5,17 +5,41 @@
 #include <stdbool.h>
 #include "IP_types.h"
 
-struct region
+struct FLOOD_FILL_region
 {
-	int boundary_colors_length;
-	int *boundary_colors;
+	int color;
+	struct FLOOD_FILL_growing_int_array boundary_colors;
+	struct FLOOD_FILL_growing_int_array members_i;
+	struct FLOOD_FILL_growing_int_array edge_members;
 	bool touches_edge;
-	int *members_i; 
-	int members_i_length;
-	int *edge_members;
-	int edge_members_length;
 };
 
-struct region *find_all_regions(struct IP_scalar_ppm inp, int *num_regions);
+struct FLOOD_FILL_FAR_options
+{
+	bool (*region_validator)(struct FLOOD_FILL_FAR_options);
+};
+
+struct FLOOD_FILL_region_validator_options
+{
+	struct FLOOD_FILL_region region;
+};
+
+
+
+struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, int *num_regions);
+
+struct FLOOD_FILL_growing_int_array
+{
+	int capacity;
+	int length;
+	int *arr;
+};
+
+
+void FLOOD_FILL_append_to_GIA(struct FLOOD_FILL_growing_int_array *gia, int V);
+
+struct FLOOD_FILL_growing_int_array FLOOD_FILL_new_gia(int len);
+
+
 
 #endif

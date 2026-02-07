@@ -265,3 +265,15 @@ Okay, we had another dumb bug, but here is where we are after 2x2 erosion. it is
 ![](attachments/Pasted%20image%2020260207160812.png)
 
 So happy with that! Now we can actually flood fill and extract boundaries. TODO: optimize.
+
+Next thing we need to do is use the flood fill! 
+
+also, idea: we could use boundary length to area ratio as an indicator we are in a reasonable shape. 
+
+So we will flood fill everything and extract a list of regions. Once we have our list of regions, we'll want to find the biggest one that is entirely surroudned by green. TODO: allow a percentage to not be green. TODO: deal with more than one block. 
+
+Uh oh, flood fill is taking forever! We might have to use scanline flood fill. Also, we have apparently 423027 regions. Great. Also it seems that memory might be a big issue, since we're repeatedly allocating like 8mb for each of these regions, even if I think we free it after? Do we? Ahh!!!
+
+Okay I started to use growing arrays. I'm not going to do this for the stack since we only allocate that once.
+
+Okay, it's a little faster now, but still not great. Regardless, let's continue forward. Let's add in a feature where we can avoid adding regions if they don't meet criteria (color, we don't care about black regions, or even green regions, now that I think about it, area, edge length, etc). 
