@@ -54,7 +54,7 @@ int main()
 	struct IP_scalar_ppm eroded = CLOSING_erosion(blurred, closing_opt);
 	IP_scalar_ppm_save("resources/eroded.ppm", eroded, false);	
 	struct IP_scalar_ppm dilated = CLOSING_dilation(eroded, closing_opt);
-	IP_scalar_ppm_save("resources/closed", dilated, false);
+	IP_scalar_ppm_save("resources/closed.ppm", dilated, false);
 
 		
 

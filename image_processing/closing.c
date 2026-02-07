@@ -62,6 +62,7 @@ struct IP_scalar_ppm CLOSING_erosion(struct IP_scalar_ppm inp, struct CLOSING_op
 
 	for (int i=0; i<height*width; ++i)
 	{
+		//if (i==1092399){asm("int3");}
 		if (pixels[i] == opt.target_color)
 		{
 			struct int_xy col_row = IP_col_row_from_index(i, width);

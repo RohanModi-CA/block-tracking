@@ -20,7 +20,7 @@ struct int_xy IP_col_row_from_index(int n, int image_width)
 	struct int_xy out;
 
 	out.y = (n/image_width);
-	out.x = n - (out.y - image_width);
+	out.x = n - (out.y*image_width);
 	return out;
 }
 

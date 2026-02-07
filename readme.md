@@ -259,3 +259,9 @@ What color do we erode with? I want to say the mode of the surrounding colors? S
 
 
 .. this is taking a very long time to run... is it all the sorts? oh no..
+
+Okay, we had another dumb bug, but here is where we are after 2x2 erosion. it is very inefficient, so we have to fix this, but:
+
+![](attachments/Pasted%20image%2020260207160812.png)
+
+So happy with that! Now we can actually flood fill and extract boundaries. TODO: optimize.
