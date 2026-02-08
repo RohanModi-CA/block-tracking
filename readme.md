@@ -362,4 +362,64 @@ After doing so, our code puts the centroid right, there:
 
 ![](attachments/Pasted%20image%2020260207234745.png)
 
-Not too bad. 
+Not too bad. Now let's see how it does with a video. 
+
+Well, let's first try with random frames of a video. This might not work very well. For example, I don't have high hopes for this:
+
+![](attachments/Pasted%20image%2020260208000820.png)
+
+I am not going to complain about this:
+
+![](attachments/Pasted%20image%2020260208001150.png)
+
+I do worry about what we will do with errors; I imagine we need some sort of checker, maybe continuity, maybe something else. But for now I think the first thing twe'd like is just a video to come in, and out comes a list of centroid positions. Those can definitely then be processed in python.
+
+For now we can start to implement this, but eventually we'll have to clean up a bit and chase a couple memory leaks.
+
+Okay, problem, for many of these, it is not finding it.
+
+Here is one issue we note:
+
+![](attachments/Pasted%20image%2020260208010314.png)
+
+So we start with this, and then it gets initially thresholded to this, which is where problems begin:
+
+![](attachments/Pasted%20image%2020260208010346.png)
+Note all the black? Erosion is not going to be a big fan of the thin green underneath, so this happens:
+
+![](attachments/Pasted%20image%2020260208010448.png)
+
+And then dilation is no help:
+
+![](attachments/Pasted%20image%2020260208010511.png)
+And this does not have an 85% border. I wonder what happens if we relax our constraint to 50%.
+
+> It gets a lot better. However, we do get into a region where it's still not happy.
+
+Start with this:
+
+![](attachments/Pasted%20image%2020260208010719.png)
+
+A very unkind normalization:
+
+![](attachments/Pasted%20image%2020260208010736.png)
+
+And after erosion and closure we get this:
+
+![](attachments/Pasted%20image%2020260208010831.png)
+
+I guess the erosion is very agressive, but it is necessary in some sense. Getting rid of these side-screw holes is one way to help. We could also enlarge the profile of the top and bottom green. 
+
+Maybe I can make this match a "squareness" constraint of isoperimetric ratio. That kills other blue noisy stuff. However this actually might not be great, since the ratios are quite close. Turns out a square is 16, and a rectangle with sides s and 2s is 18. 
+
+However, running the trial, we only got so far one that looks *completely* off. Let's see what happened there, although *none* of the 50 failed this time, so good.
+
+Ah, in this case, our string became our region. Maybe we should increase our minimum area? Or play with settings otherhow.
+
+![](attachments/Pasted%20image%2020260208011902.png)
+
+
+Oh, and I was being dumb! Anyway, look at 50 frames:
+
+![](attachments/50frame.mp4)
+

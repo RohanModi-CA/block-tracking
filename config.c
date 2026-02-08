@@ -37,10 +37,23 @@ bool CONFIG_region_validator(struct FLOOD_FILL_region_validator_options opt, voi
 		}
 	}
 
-	if (((float)containing_color_boundary_count)/((float)opt.region.boundary_colors.length) <= 0.85)
+	bool enclosed = (((float)containing_color_boundary_count)/((float)opt.region.boundary_colors.length) >= 0.5);
+
+	bool somewhat_enclosed = (((float)containing_color_boundary_count)/((float)opt.region.boundary_colors.length) >= 0.3);
+
+	// look at isoperimetric ratio
+	int perimeter = opt.region.edge_members.length;
+	int area = members;
+	int IPratio = (perimeter*perimeter)/area;
+
+	bool square_like = IPratio < 17 && somewhat_enclosed;
+
+	if (!square_like && !enclosed)
 	{
 		return false;
 	}
+
+	
 
 	return true;
 }

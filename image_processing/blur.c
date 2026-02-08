@@ -58,6 +58,17 @@ struct scalar_ppm_array
 };
 
 
+static void free_scalar_ppm_array (struct scalar_ppm_array *arr)
+{
+	for (int i=0; i<arr->ppms_length; ++i)
+	{
+		free(arr->ppms[i].pixel_values);
+	}
+	return;
+}
+
+
+// leaks memory
 static struct scalar_ppm_array thresholded_to_ppm_array(struct IP_scalar_ppm thresholded)
 {
 	// This must have a color map.
@@ -149,6 +160,7 @@ struct IP_scalar_ppm IP_blur(struct IP_scalar_ppm thresholded, struct IP_blur_op
 	thresholded_G = thresholded_channels_ppms.ppms[1];
 	thresholded_B = thresholded_channels_ppms.ppms[2];
 
+
 	struct IP_scalar_ppm_map inp_map = thresholded_R.map;
 
 	struct HITBOXING_SAT_options SAT_options;
@@ -157,6 +169,7 @@ struct IP_scalar_ppm IP_blur(struct IP_scalar_ppm thresholded, struct IP_blur_op
 	SAT_R = HITBOXING_SAT(thresholded_R, SAT_options);
 	SAT_G = HITBOXING_SAT(thresholded_B, SAT_options);
 	SAT_B = HITBOXING_SAT(thresholded_G, SAT_options);
+
 
 	DENSITY_R = HITBOXING_DENSITY_MAP(SAT_R, SAT_options);
 	DENSITY_G = HITBOXING_DENSITY_MAP(SAT_G, SAT_options);
@@ -185,6 +198,8 @@ struct IP_scalar_ppm IP_blur(struct IP_scalar_ppm thresholded, struct IP_blur_op
 		IP_scalar_ppm_save("resources/recombined_blurred.ppm", recombined_blurred, false);
 	}
 
+
+	free_scalar_ppm_array(&thresholded_channels_ppms);
 	return recombined_blurred;
 }
 
