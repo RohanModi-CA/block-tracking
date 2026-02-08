@@ -345,3 +345,21 @@ So our border gets drawn as:
 For the one of interest, very nice. We can actually add in the border detection stuff to our logic to discard regions.
 
 Done. And now the only selected region, is the Blue. TODO: Don't require us to iterate through the list of bounding colors.
+
+---
+
+In principle, I think the image work is "done" (assuming it all works AND after we tidy things to allow multiple particle tracking, which should not be very hard, in fact it should really work... now?), so I think really we should just write all the border pixel locations to a data file so that python can handle the centroid stuff. We could do it in C, which I'm tempted to do, but there's not really much of a point. Actually instead of fitting a trapezoid, we could just literally take a centroid by arithmetic, right?
+
+So a centroid is just
+
+$$\text{centroid} = \frac{1}{\text{Area}}\int_{\text{shape}} \vec{x}  dA$$
+
+So discretely:
+$$\text{centroid} = \frac{1}{\text {\# Pixels}}\sum_{\text{Pixels}} \vec{x}$$
+And that is very easy for us to do in C, so we shall.
+
+After doing so, our code puts the centroid right, there:
+
+![](attachments/Pasted%20image%2020260207234745.png)
+
+Not too bad. 

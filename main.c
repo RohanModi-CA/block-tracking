@@ -1,4 +1,5 @@
 #include "blur.h"
+#include "tracking/region_handling.h"
 #include "lib/ppm_lib/ppm.h"
 #include "image_processing/IP_types.h"
 #include "image_processing/normalize_image.h"
@@ -78,4 +79,6 @@ int main()
 
 	regions = FLOOD_FILL_find_all_regions(dilated, &num_regions, FAR_opt);
 
+	struct int_xy centroid = REGION_HANDLING_centroid(regions[0], blurred.width);
+	printf("\nY:%d, X: %d\n",centroid.x, centroid.y);
 }

@@ -6,11 +6,12 @@ LDFLAGS := -lm
 # Directories
 LIB_DIR := lib
 IMG_PROC_DIR := image_processing
-SRC_DIRS := . $(IMG_PROC_DIR)
+TRACKING_DIR := tracking            
+SRC_DIRS := . $(IMG_PROC_DIR) $(TRACKING_DIR) 
 LIB_SUBDIRS := $(shell find $(LIB_DIR) -type d)
 
 # Include paths
-INCLUDES := $(addprefix -I,$(LIB_SUBDIRS) $(IMG_PROC_DIR))
+INCLUDES := $(addprefix -I,$(LIB_SUBDIRS) $(IMG_PROC_DIR) $(TRACKING_DIR))
 
 # Output
 TARGET := main
