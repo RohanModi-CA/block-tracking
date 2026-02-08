@@ -68,8 +68,13 @@ int main()
 	struct FLOOD_FILL_FAR_options FAR_opt;
 	FAR_opt.region_validator = region_validator;
 	// We need to give it the color we're interested in, which is Blue.
+	// And the containing color, which is green.
 	int blue_index = IP_map_to_index(blurred.map, BLUE);
-	FAR_opt.ctx = &blue_index;
+	int green_index = IP_map_to_index(blurred.map, DGREEN);
+	struct CONFIG_region_validator_options CRV_opt;
+	CRV_opt.color_interested_in = blue_index;
+	CRV_opt.containing_color = green_index;
+	FAR_opt.ctx = &CRV_opt;
 
 	regions = FLOOD_FILL_find_all_regions(dilated, &num_regions, FAR_opt);
 

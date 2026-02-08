@@ -343,3 +343,5 @@ So our border gets drawn as:
 ![](attachments/Pasted%20image%2020260207202548.png)
 
 For the one of interest, very nice. We can actually add in the border detection stuff to our logic to discard regions.
+
+Done. And now the only selected region, is the Blue. TODO: Don't require us to iterate through the list of bounding colors.
