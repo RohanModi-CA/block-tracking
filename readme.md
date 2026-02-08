@@ -421,5 +421,5 @@ Ah, in this case, our string became our region. Maybe we should increase our min
 
 Oh, and I was being dumb! Anyway, look at 50 frames:
 
-![](attachments/50frame.mp4)
+![video](attachments/50frame.mp4)
 
