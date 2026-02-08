@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "flood_fill.h"
 #include "IP_types.h"
 #include "stdbool.h"
@@ -18,6 +19,10 @@ struct flood_fill_recursive_call_options
 	struct FLOOD_FILL_region *region;
 	int which_color;
 	int i_caller;
+
+	// This should be pre-allocated but the recursive call will zero it.
+	bool *visited_yet_by_current_region;
+
 };
 
 
@@ -61,91 +66,78 @@ static void initialize_region(struct FLOOD_FILL_region *r)
 
 
 
+// llm refactor, logic is good.
 void flood_fill_iterative(struct flood_fill_recursive_call_options opt)
 {
-	// we make a stack that keeps track of what's the next pixel
-	// to look at because otherwise we stack overflow.
-	int *stack_i = malloc(opt.inp.height * opt.inp.width * sizeof(int));
-	int *stack_caller = malloc(opt.inp.height * opt.inp.width * sizeof(int));
-	int stack_size = 0;
-	
-	// push the initial pixel
-	stack_i[stack_size] = opt.i_start;
-	stack_caller[stack_size] = opt.i_caller;
-	stack_size++;
-	
-	int image_height = opt.inp.height;
-	int image_width = opt.inp.width;
-	
-	while (stack_size > 0)
-	{
-		// Pop from stack
-		stack_size--;
-		int i_current = stack_i[stack_size];
-		int i_caller = stack_caller[stack_size];
-		
-		if (opt.visited_yet[i_current])
-			continue;
-			
-		int pixel_color = opt.inp.pixel_values[i_current];
-		
-		if (pixel_color != opt.which_color)
-		{
-			FLOOD_FILL_append_to_GIA(&opt.region->edge_members, i_caller);
-			FLOOD_FILL_append_to_GIA(&opt.region->boundary_colors, pixel_color);
-			continue;
-		}
-		
-		opt.visited_yet[i_current] = true;
+    int height = opt.inp.height;
+    int width = opt.inp.width;
+    int *pixels = opt.inp.pixel_values;
 
-		FLOOD_FILL_append_to_GIA(&opt.region->members_i, i_current);
+    // Stack optimization: pre-allocate worst case
+    int *stack = malloc(height * width * sizeof(int));
+    int stack_size = 0;
+    
+    // Push start
+    stack[stack_size++] = opt.i_start;
+    opt.visited_yet[opt.i_start] = true; 
 
-		
-		struct int_xy my_xy = IP_col_row_from_index(i_current, image_width);
-		int col = my_xy.x;
-		int row = my_xy.y;
-		
+    // Directions: Up, Down, Left, Right
+    int dr[] = {-1, 1, 0, 0};
+    int dc[] = {0, 0, -1, 1};
 
+    while (stack_size > 0)
+    {
+        int curr_idx = stack[--stack_size];
+        
+        // Add current pixel to region members
+        FLOOD_FILL_append_to_GIA(&opt.region->members_i, curr_idx);
 
-		if (row != 0)
-		{
-			int neighbor = index_from_row_col(row-1, col, image_width);
-			if (!opt.visited_yet[neighbor]) {  
-				stack_i[stack_size] = neighbor;
-				stack_caller[stack_size] = i_current;
-				stack_size++;
-			}
-		}
-		else opt.region->touches_edge = true;
-		
-		if (row != image_height-1)
-		{
-			stack_i[stack_size] = index_from_row_col(row+1, col, image_width);
-			stack_caller[stack_size] = i_current;
-			stack_size++;
-		}
-		else opt.region->touches_edge = true;
-		
-		if (col != 0)
-		{
-			stack_i[stack_size] = index_from_row_col(row, col-1, image_width);
-			stack_caller[stack_size] = i_current;
-			stack_size++;
-		}
-		else opt.region->touches_edge = true;
-		
-		if (col != image_width-1)
-		{
-			stack_i[stack_size] = index_from_row_col(row, col+1, image_width);
-			stack_caller[stack_size] = i_current;
-			stack_size++;
-		}
-		else opt.region->touches_edge = true;
-	}
-	
-	free(stack_i);
-	free(stack_caller);
+        struct int_xy xy = IP_col_row_from_index(curr_idx, width);
+        int r = xy.y;
+        int c = xy.x;
+
+        bool is_edge_pixel = false;
+
+        // Check all 4 neighbors
+        for(int i = 0; i < 4; i++) {
+            int nr = r + dr[i];
+            int nc = c + dc[i];
+
+            // 1. Image Boundary Check
+            if (nr < 0 || nr >= height || nc < 0 || nc >= width) {
+                opt.region->touches_edge = true;
+                is_edge_pixel = true;
+                continue;
+            }
+
+            int n_idx = index_from_row_col(nr, nc, width);
+            int n_color = pixels[n_idx];
+
+            // 2. Color Check
+            if (n_color != opt.which_color) {
+                // It is a boundary.
+                // We append it EVERY time we see it. 
+                // This gives us the total 'perimeter contact' with this color.
+                FLOOD_FILL_append_to_GIA(&opt.region->boundary_colors, n_color);
+                is_edge_pixel = true;
+            } 
+            else {
+                // Same color - Traverse if not visited
+                if (!opt.visited_yet[n_idx]) {
+                    opt.visited_yet[n_idx] = true; 
+                    stack[stack_size++] = n_idx;
+                }
+            }
+        }
+
+        if (is_edge_pixel) {
+            FLOOD_FILL_append_to_GIA(&opt.region->edge_members, curr_idx);
+        }
+    }
+    
+    free(stack);
 }
+
 
 
 /* Puts the number of regions into num_regions.
@@ -155,6 +147,10 @@ struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, 
 	int total_pixels = inp.height * inp.width;
 	bool *visited = calloc(total_pixels, sizeof(bool));
 	
+	// This will be zeroed each iteration by the iterator.
+	bool *visited_yet_by_current_region = malloc(sizeof(bool)*total_pixels);
+
+
 	// worst case is that each pixel is its own region. i thought somehow
 	// four color theorem could mean that the worst case was better
 	// but now that I think of it it implies the opposite!
@@ -178,6 +174,7 @@ struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, 
 		RCO_opt.inp = inp;
 		RCO_opt.i_start = i;
 		RCO_opt.visited_yet = visited;
+		RCO_opt.visited_yet_by_current_region = visited_yet_by_current_region;
 		RCO_opt.region = r;
 		RCO_opt.which_color = inp.pixel_values[i];
 		RCO_opt.i_caller = -1;
@@ -203,5 +200,6 @@ struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, 
 	}
 	
 	free(visited);
+	free(visited_yet_by_current_region); 
 	return regions;
 }

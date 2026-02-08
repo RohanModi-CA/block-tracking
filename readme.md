@@ -294,3 +294,52 @@ Cool! That is a bona fide blue region. However there are no boundary_colors whic
 Ha! Great. 
 
 However, it says there are no edge members either, which is unfortunate. What's up with that?
+
+Oh, it's because we're `continue`ing if we've visited a pixel before checking if it is neighbours us, so if we've already processed its neighbour region, then we won't record it. However we need to be careful with double counting. So I think we need to introduce a visited_by_region array to avoid this level of double counting.
+
+Okay, having done that, I do get a boundary and edge members...
+![](attachments/Pasted%20image%2020260207183534.png)
+let's go back to GIMP.
+
+No good way to do this except manually so:
+![](attachments/Pasted%20image%2020260207184056.png)
+Hmm. The code says 117, I count 130. Not sure where the difference could come from. I guess let's print them all.
+
+So what our code does is identify all of these:
+![](attachments/Pasted%20image%2020260207190619.png)
+So it gets them right, it just misses some. It seems to miss some straight segments, which is odd, since you'd think it would miss corners or something, which it seems to do well with.
+
+Oh, I noticed one error, but fixing that has:
+
+![](attachments/Pasted%20image%2020260207191612.png)
+Improvement, but still missing some.
+
+Hmm, it seems our code is never reaching one of the missing pixels. Let me check if it reaches the ones that are not missing. Hmm, it doesn't either. Maybe it is GDB being weird?. Oh I think it was me. Okay it reaches both at least once from the black region?
+![](attachments/Pasted%20image%2020260207193131.png)
+Here. So it's because we don't put it on the stack since it has already been visited. And this was to prevent the stack from getting very large. I guess there is no harm in checking this, here.
+
+So our issue is that we are not putting things on the stack. Our current flow is that a pixel gets put onto the stack, we notice it is not part of our region, which means its caller is a boundary, and then we continue.
+
+I guess there is no harm in not putting it on the stack, if we handle this correctly? Right now we say, hey, if you've not been visited yet, then we put you on the stack. This is to avoid going to ones we've already gone to. The issue is that this is global. What we can do instead is to then check, hey, have we visited you, locally? If we have globally, but not locally, then you're not part of us, so I'm a boundary pixel. 
+
+I'm wondering though if this is an ugly patch instead of a proper fix. What is the proper way to do this? Hmm. Because it is also possible that we can not have gone to you globally but you are not a member of our region. Then we will still visit you. 
+
+Are these the only two options? neigbour is:
+1. Globally Unvisited
+	1. Thus we put you on the stack
+		1.  if you're not a member of this region, we'll mark your caller as a boundary pixel
+2. Globally visited
+	1. Locally unvisited
+		1. Thus you're in another region, I am a boundary pixel
+	2. Locally visited
+
+
+Okay, this is a mess. We should just ALWAYS check if a pixel is a boundary pixel. And if it is, we don't put it on the stack. 
+
+Okay, with a refactor, it works! Cool.
+
+So our border gets drawn as:
+
+![](attachments/Pasted%20image%2020260207202548.png)
+
+For the one of interest, very nice. We can actually add in the border detection stuff to our logic to discard regions.
