@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "../misc/types.h"
 
 
 static void centroid_write_to_fp(FILE *fp, struct centroid c)
@@ -93,11 +94,8 @@ void VIDEO_DETAILS_write_to_file(const char *fn, struct VideoDetails vd)
 	fwrite(&vd.version, sizeof(int), 1, fp);
 
 
-	// write the filename length
-	fwrite(&vd.video_fn.len, sizeof(int), 1, fp);
-
-	// write the video filename
-	fwrite(vd.video_fn.s, sizeof(char), vd.video_fn.len, fp);
+	// write the filename string struct
+	string_write_to_fp(fp, vd.video_fn);
 	
 	// print whether split to frames or not
 	fwrite(&vd.split_to_frames, sizeof(bool), 1, fp);
@@ -113,11 +111,8 @@ void VIDEO_DETAILS_write_to_file(const char *fn, struct VideoDetails vd)
 
 	for(int i=0; i<vd.frames_fn_length; ++i)
 	{
-		// write the filename len
-		fwrite(&vd.frames_fn[i].len, sizeof(int), 1, fp);
-
-		// write the filename
-		fwrite(vd.frames_fn[i].s, sizeof(char), vd.frames_fn[i].len, fp);
+		// write the string struct.
+		string_write_to_fp(fp, vd.frames_fn[i]);
 	}
 	
 	for (int i=0; i<vd.frames_fn_length; ++i)
@@ -137,12 +132,8 @@ struct VideoDetails VIDEO_DETAILS_read_from_file(const char *fn)
 	// version
 	fread(&out.version, sizeof(int), 1, fp);
 
-	// filename length
-	fread(&out.video_fn.len, sizeof(int), 1, fp);
-
-	// then the video filename
-	out.video_fn.s = (char *) malloc(sizeof(char) * out.video_fn.len);
-	fread(out.video_fn.s, sizeof(char), out.video_fn.len, fp);
+	// read the string.
+	out.video_fn = string_read_from_fp(fp);
 
 	// Have we already split it?
 	fread(&out.split_to_frames, sizeof(bool), 1, fp);
@@ -164,10 +155,8 @@ struct VideoDetails VIDEO_DETAILS_read_from_file(const char *fn)
 	out.frames_fn = (struct string *) malloc(sizeof(struct string)*out.frames_fn_length);
 	for(int i=0; i<out.frames_fn_length; ++i)
 	{
-		// read the length
-		fread(&out.frames_fn[i].len, sizeof(int), 1, fp);
-		out.frames_fn[i].s = (char *) malloc(sizeof(char)*out.frames_fn[i].len);
-		fread(out.frames_fn[i].s, sizeof(char), out.frames_fn[i].len, fp);
+		// read the strings
+		out.frames_fn[i] = string_read_from_fp(fp);
 	}
 
 	out.centroids = (struct centroid_results *) malloc(sizeof(struct centroid_results) * out.frames_fn_length);

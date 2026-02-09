@@ -477,4 +477,8 @@ struct centroid
 
 Okay, I think that's good. Now we'll need to write a function to read and write this to a file, and we're good on this front.
 
-Okay, done. Perhaps some organization for misc. types would be a good thing but that's not really important.
+Okay, done. Perhaps some organization for misc. types would be a good thing but that's not really important. Good. 
+
+So the next thing is we want to take in a root video and then convert it to our ppm's, which I think is best left up to ffmpeg. Let's write our wrapper. It should take in a `const char *fn`, then pass it to the corresponding ffmpeg command, which needs information about the output directory, and then we should first check whether or not we actually have this, perhaps by reading information on it, and if not, break it up into frames and populate our VideoDetails. Hmm. 
+
+Since we'll have more than one video details, we'll probably have to deal with that. I think we'll just make multiple video details. All within some resources/subfolder. Yeah, I'm good with that. 

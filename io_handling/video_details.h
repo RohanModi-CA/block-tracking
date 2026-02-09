@@ -2,14 +2,7 @@
 #define VIDEO_DETAILS_H
 #include <stdbool.h>
 #include "../image_processing/IP_types.h"
-
-
-struct string
-{
-	int len;
-	char *s;
-};
-
+#include "../misc/types.h"
 
 
 struct centroid
