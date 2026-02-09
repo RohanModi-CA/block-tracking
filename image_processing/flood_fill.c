@@ -52,7 +52,18 @@ struct FLOOD_FILL_growing_int_array FLOOD_FILL_new_gia(int cap)
 	return out;
 }
 
+void FLOOD_FILL_free_growing_int_array(struct FLOOD_FILL_growing_int_array gia)
+{
+	free(gia.arr);
+}
 
+void FLOOD_FILL_free_region(struct FLOOD_FILL_region region)
+{
+	FLOOD_FILL_free_growing_int_array(region.boundary_colors);
+	FLOOD_FILL_free_growing_int_array(region.members_i);
+	FLOOD_FILL_free_growing_int_array(region.edge_members);
+	return;
+}
 
 
 static void initialize_region(struct FLOOD_FILL_region *r)
@@ -140,7 +151,7 @@ void flood_fill_iterative(struct flood_fill_recursive_call_options opt)
 
 
 
-/* Puts the number of regions into num_regions.
+/* Puts the number of regions into num_regions. LEAKS THE REGIONS
  */ 
 struct FLOOD_FILL_region *FLOOD_FILL_find_all_regions(struct IP_scalar_ppm inp, int *num_regions, struct FLOOD_FILL_FAR_options opt)
 {

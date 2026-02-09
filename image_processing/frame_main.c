@@ -14,7 +14,6 @@
 
 struct int_xy frame_to_centroid(const char *fn)
 {
-
 	PPM image = PPM_snew(fn);
 
 	//printf("PPM width: %d, height: %d\n", image->width, image->height);
@@ -92,6 +91,20 @@ struct int_xy frame_to_centroid(const char *fn)
 	}
 
 	struct int_xy centroid = REGION_HANDLING_centroid(regions[0], blurred.width);
+
+
+	// and let's free all of the intermediates;
+	IP_scalar_ppm_free(normalized);
+	IP_scalar_ppm_free(blurred);
+	IP_scalar_ppm_free(eroded);
+	IP_scalar_ppm_free(dilated);
+	PPM_free(image);
+
+
+	for (int i=0; i<num_regions; ++i)
+	{
+		FLOOD_FILL_free_region(regions[i]);
+	}
 
 	return centroid;
 }

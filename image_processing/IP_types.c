@@ -26,7 +26,10 @@ struct int_xy IP_col_row_from_index(int n, int image_width)
 
 
 
-
+void IP_scalar_ppm_free(struct IP_scalar_ppm scalar)
+{
+	free(scalar.pixel_values);
+}
 
 PPM IP_scalar_to_normal_PPM(struct IP_scalar_ppm scalar)
 {

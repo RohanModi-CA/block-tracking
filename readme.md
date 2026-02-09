@@ -423,3 +423,58 @@ Oh, and I was being dumb! Anyway, look at 50 frames:
 
 ![video](attachments/50frame.mp4)
 
+
+Okay, now let's start making this actually usable, which means we need some sort of data container for each video. I imagine each video is a natural place to segment data, so we'll have a container for that. We'll need
+
+```c
+
+struct VideoDetails
+{
+	// version number, because why not.
+	int version;
+	// should we store the relative or absolute link?
+	// Not sure. Maybe both? absolute is useless
+	// for shared, but makes things simpler... or we
+	// could hash the videos? but that will take a while, 
+	// which could be annoying, but maybe better than ffmpeg
+	// or filename compare. For now we'll just store
+	// a filename, of any type.
+	char *video_fn;
+	// One of the first operations we'll do is 
+	// split the video file into its constituent
+	// ppms, which is a costly operation,
+	// so we'd definitely like to cache the outputs
+	// so maybe we'll keep this all local based.
+	// So we will store absolute links to the
+	bool split_to_frames;
+	int frames_fn_length;
+	char **frames_fn;
+	
+	// Then the next thing is the actual centroid results. Each of these should probably be in their own struct? But we will have multiple centroid results per frame. I think we'll make one struct per frame.
+	struct centroid_results *centroids;
+};
+
+// and these results should include
+// I guess we won't store the filename within the centroid result.
+struct centroid_results
+{
+	int goal_centroid_n; 
+	int centroids_length;
+	
+	struct centroid *centroids;
+};
+
+struct centroid
+{
+	bool attempted;
+	bool successful;
+	struct int_xy centroid;
+	// so that we can use different ones if this was a failure:
+	int technique;
+};
+
+```
+
+Okay, I think that's good. Now we'll need to write a function to read and write this to a file, and we're good on this front.
+
+Okay, done. Perhaps some organization for misc. types would be a good thing but that's not really important.

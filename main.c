@@ -67,7 +67,7 @@ int main()
 	//
 
 	char **files = NULL;
-	size_t n = get_first_n_files_sorted("resources/vid/frames", 50, &files);
+	size_t n = get_first_n_files_sorted("resources/vid/frames", 500, &files);
 
 
 	//struct int_xy centroid = frame_to_centroid("resources/vid/frames/000000001.ppm");

@@ -33,6 +33,7 @@ struct FLOOD_FILL_FAR_options
 };
 
 
+void FLOOD_FILL_free_growing_int_array(struct FLOOD_FILL_growing_int_array gia);
 
 
 
@@ -46,5 +47,6 @@ void FLOOD_FILL_append_to_GIA(struct FLOOD_FILL_growing_int_array *gia, int V);
 struct FLOOD_FILL_growing_int_array FLOOD_FILL_new_gia(int len);
 
 
+void FLOOD_FILL_free_region(struct FLOOD_FILL_region region);
 
 #endif

@@ -200,6 +200,17 @@ struct IP_scalar_ppm IP_blur(struct IP_scalar_ppm thresholded, struct IP_blur_op
 
 
 	free_scalar_ppm_array(&thresholded_channels_ppms);
+	//IP_scalar_ppm_free(thresholded_R);
+	//IP_scalar_ppm_free(thresholded_G);
+	//IP_scalar_ppm_free(thresholded_B);
+	IP_scalar_ppm_free(SAT_R);
+	IP_scalar_ppm_free(SAT_G);
+	IP_scalar_ppm_free(SAT_B);
+	IP_scalar_ppm_free(DENSITY_R);
+	IP_scalar_ppm_free(DENSITY_G);
+	IP_scalar_ppm_free(DENSITY_B);
+
+
 	return recombined_blurred;
 }
 
